@@ -2,9 +2,12 @@ import cv2
 import argparse
 from ultralytics import YOLO
 import os
+import json
+import requests  # API'ye istek göndermek için gerekli kütüphane
 from datetime import datetime
 import logging
 
+# Dizinleri oluşturma
 os.makedirs("records", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
 
@@ -51,6 +54,9 @@ out = cv2.VideoWriter(video_filename, fourcc, 20.0, (int(cap.get(3)), int(cap.ge
 
 logging.info(f"Video recording started: {video_filename}")
 
+# Flask API URL
+flask_api_url = "http://localhost:5000/event"
+
 while True:
     ret, frame = cap.read()
 
@@ -71,7 +77,33 @@ while True:
 
             screenshot_filename = os.path.join(output_folder, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{class_name}.jpg")
             cv2.imwrite(screenshot_filename, frame)
-            logging.info(f"Detected: {class_name} with confidence {score:.2f}. Screenshot saved: {screenshot_filename}")
+
+            # JSON data structure
+            json_data = {
+                "event_type": "human_detection",
+                "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "object_type": class_name,
+                "confidence": score,
+                "bounding_box": {
+                    "x": int(x1),
+                    "y": int(y1),
+                    "width": int(x2 - x1),
+                    "height": int(y2 - y1)
+                }
+            }
+
+            # Send JSON data to Flask API
+            try:
+                response = requests.post(flask_api_url, json=json_data)
+                if response.status_code == 200:
+                    logging.info(f"Successfully sent event data to Flask API: {json_data}")
+                else:
+                    logging.error(f"Failed to send event data to Flask API. Status code: {response.status_code}")
+            except Exception as e:
+                logging.error(f"Error sending data to Flask API: {e}")
+
+            # Log the detection
+            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] EVENT: {class_name.capitalize()} detected at ({int(x1)}, {int(y1)}) with confidence {score:.2f}")
 
     cv2.imshow("RTSP Stream with YOLOv8", frame)
 
