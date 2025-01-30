@@ -1,3 +1,4 @@
+
 import cv2
 import argparse
 from ultralytics import YOLO
@@ -57,7 +58,7 @@ logging.info(f"Video recording started: {video_filename}")
 flask_api_url = "http://localhost:5000/event"
 
 # Define the area of interest (AOI) as a rectangle (x1, y1, x2, y2)
-aoi = (100, 100, 500, 400)  # Example coordinates, adjust as needed
+aoi = (100, 100, 800, 700)  # Example coordinates, adjust as needed
 
 while True:
     ret, frame = cap.read()
