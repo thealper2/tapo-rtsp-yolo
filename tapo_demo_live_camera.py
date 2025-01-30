@@ -3,11 +3,10 @@ import argparse
 from ultralytics import YOLO
 import os
 import json
-import requests  # API'ye istek göndermek için gerekli kütüphane
+import requests
 from datetime import datetime
 import logging
 
-# Dizinleri oluşturma
 os.makedirs("records", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
 
