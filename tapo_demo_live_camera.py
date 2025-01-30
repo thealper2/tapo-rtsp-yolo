@@ -91,6 +91,11 @@ while True:
                 }
             }
 
+            json_object = json.dumps(json_data, indent=4)
+            json_filename = os.path.join(output_folder, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{class_name}.json")
+            with open(json_filename, "w") as outfile:
+                outfile.write(json_object)
+
             # Send JSON data to Flask API
             try:
                 response = requests.post(flask_api_url, json=json_data)
